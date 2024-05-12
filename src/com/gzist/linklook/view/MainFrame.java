@@ -72,6 +72,29 @@ public class MainFrame extends JFrame {
         btnResort.setContentAreaFilled(false);
         btnResort.setBorderPainted(false);
 
+        /**
+         * 对"重排"按钮添加监听事件
+         */
+        btnResort.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                System.out.println("重排");
+                gameData.shuffleData(); // 打乱顺序
+                showImage(); // 显示图片
+            }
+        });
+        /**
+         * 对"新游戏"按钮添加监听事件
+         */
+        btnReplay.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                System.out.println("新游戏");
+                setVisible(false);
+                new MainFrame().setVisible(true);
+                dispose();  // 释放此窗口的资源
+            }
+        });
 
         scorePane.add(btnResort);
         scorePane.add(btnReplay);
@@ -119,6 +142,15 @@ public class MainFrame extends JFrame {
                                 }
                                 System.out.println();
                             }
+                            // 判断能否相连
+                            if (GameRule.isConnect(gameData.data, row1, col1, row2, col2)) {
+                                // 设置两个按钮不可见
+                                button1.setVisible(false);
+                                button2.setVisible(false);
+                                // 设置两个按钮的 data值为0
+                                gameData.data[row1][col1] = 0;
+                                gameData.data[row2][col2] = 0;
+                            }
                             // 还原两个按钮为空
                             button1.setBackground(Color.WHITE);
                             button2.setBackground(Color.WHITE);
@@ -148,6 +180,10 @@ public class MainFrame extends JFrame {
                         60, 60,
                         Image.SCALE_DEFAULT));
                 buttons[i][j].setIcon(icon);
+                // 如果data为零，按钮不显示
+                if (gameData.data[i+1][j+1] == 0) {
+                    buttons[i][j].setVisible(false);
+                }
             }
         }
     }
