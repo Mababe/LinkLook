@@ -1,6 +1,8 @@
 package com.gzist.linklook.view;
 
-import com.gzist.linklook.data.UserEmpty;
+import com.gzist.linklook.data.Users;
+import com.gzist.linklook.data.UsersService;
+import com.gzist.linklook.data.UsersServiceImpl;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,13 +16,12 @@ public class LoginFrame extends JFrame {
     private static final int height = 200; // 设置窗口高度
     private static final int width = 350; // 设置窗口宽度
 
-    private JTextField username = new JTextField("");
-//	private JPasswordField password = new JPasswordField();
+    UsersService userSerivce = new UsersServiceImpl();
 
     public LoginFrame() {
         // 获取屏幕大小
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        this.setBounds(1, 1, width + 17, height + 38); 	// 设置大小
+        this.setBounds(1, 1, width + 17, height + 38);    // 设置大小
         this.setLocation((screenSize.width - width) / 2,
                 (screenSize.height - height) / 2); // 居中显示
         this.setTitle("登录界面"); // 设置程序名字
@@ -28,53 +29,61 @@ public class LoginFrame extends JFrame {
         initPane(); // 初始化登录面板
 
     }
+
     /**
      * 初始化登录面板
      */
     private void initPane() {
         final JPanel fieldPanel = new JPanel(); // 生成panel对象
-        fieldPanel.setLayout(null); // 设置空布局
+        //创建表格布局管理器
+        GridLayout gridLayout = new GridLayout(4, 1, 10, 10);
+        //让窗体交给表格布局管理器管理
+        fieldPanel.setLayout(gridLayout);
 
-        JLabel a1 = new JLabel("你的名字:");
-        a1.setBounds(70, 70, 100, 30); // 设置位置以及大小
-//		JLabel a2 = new JLabel("密  码:");
-//		a2.setBounds(80,90,50,20);
+        JLabel a1 = new JLabel("昵  称:", SwingConstants.RIGHT);
         fieldPanel.add(a1); // 添加按钮
-//		fieldPanel.add(a2);
+        JTextField nickname = new JTextField(12);
+        fieldPanel.add(nickname); // 添加文本框
 
-        username.setBounds(140, 70, 120, 30); // 设置位置以及大小
-//		password.setBounds(130, 90, 120, 20);
-        fieldPanel.add(username); // 添加文本框
-//		fieldPanel.add(password);
+        JLabel a2 = new JLabel("账  号:", SwingConstants.RIGHT);
+        fieldPanel.add(a2);
+        JTextField loginId = new JTextField(12);
+        fieldPanel.add(loginId);
+
+        JLabel a3 = new JLabel("密  码:", SwingConstants.RIGHT);
+        fieldPanel.add(a3);
+        JPasswordField loginPwd = new JPasswordField(12);
+        fieldPanel.add(loginPwd);
 
         JButton jbu1 = new JButton("开始游戏"); // 生成确定按钮
         JButton jbu2 = new JButton("退出游戏"); // 生成取消按钮
-        jbu1.setBounds(80, 120, 100, 30); // 设置位置以及大小
-        jbu2.setBounds(200, 120, 100, 30); // 设置位置以及大小
-        fieldPanel.add(jbu1); // 添加按钮
-        fieldPanel.add(jbu2); // 添加按钮
+        fieldPanel.add(jbu1, BorderLayout.SOUTH); // 添加按钮
+        fieldPanel.add(jbu2, BorderLayout.SOUTH); // 添加按钮
         /**
          * 点击“确定”按钮
          */
         jbu1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                String name = username.getText(); //获取文本框的文本
-//				String pwd = String.valueOf(password.getPassword());
-                if (!"".equals(name)) {   //&&!"".equals(pwd) 文本不能为空
-//					System.out.println(name);
-//					System.out.println(pwd);
-                    setVisible(false);
-                    UserEmpty.username = name; // 设置名字
-                    MainFrame mainFrame = new MainFrame(); // 打开主界面
-                    mainFrame.setVisible(true); //设置可见
-                    dispose(); // 当前界面消失
+                String name = nickname.getText(); //获取文本框的文本
+                String id = loginId.getText();
+                String pwd = String.valueOf(loginPwd.getPassword());
+                System.out.println(name + " " + id + " " + pwd);
+                if (!"".equals(id) && !"".equals(pwd)) {   //&&!"".equals(pwd) 文本不能为空
+                    Users users = userSerivce.login(id, pwd);
+                    if (users == null) {
+//                    System.out.println(users);
+                        System.out.println("用户名或密码不正确");
+                    }else{
+                        System.out.println("登陆成功");
+                        setVisible(false);
+                        Users.nickname = name; // 设置名字
+                        MainFrame mainFrame = new MainFrame(); // 打开主界面
+                        mainFrame.setVisible(true); // 设置可见
+                        dispose(); // 当前界面消失
+                    }
                 } else {
-                    setVisible(false);
-                    UserEmpty.username = ""; // 设置名字
-                    MainFrame mainFrame = new MainFrame(); // 打开主界面
-                    mainFrame.setVisible(true); //设置可见
-                    dispose(); // 当前界面消失
+                    System.out.println("输入不能为空！");
                 }
             }
         });
