@@ -3,6 +3,7 @@ package com.gzist.linklook.view;
 import com.gzist.linklook.data.GameData;
 import com.gzist.linklook.data.GameFile;
 import com.gzist.linklook.data.GameRule;
+import com.gzist.linklook.data.UserEmpty;
 
 import javax.swing.*;
 import java.awt.*;
@@ -95,7 +96,8 @@ public class MainFrame extends JFrame {
      */
     private void initPane() {
         JPanel scorePane = new JPanel(new FlowLayout()); // 设置成流体布局
-        scorePane.add(new JLabel("用户名：hui"));
+        scorePane.add(new JLabel("用户名："));
+        scorePane.add(new JLabel(UserEmpty.username));
         scorePane.add(new JLabel("    "));
         scorePane.add(new JLabel("得分："));
         lblScroe.setText("" + score);
