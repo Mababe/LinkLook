@@ -1,6 +1,7 @@
 package com.gzist.linklook.view;
 
 import com.gzist.linklook.data.GameData;
+import com.gzist.linklook.data.GameFile;
 import com.gzist.linklook.data.GameRule;
 
 import javax.swing.*;
@@ -25,6 +26,11 @@ public class MainFrame extends JFrame {
     int leftBlock = GameData.rows * GameData.cols; // 获取总图片数
     final int timeLimit = 20;
     int timeLeft = timeLimit;
+
+    // 分数
+    GameFile gameFile = new GameFile();
+    JLabel lblScroe = new JLabel();
+    int score ;//gameFile.readScore()
 
     public MainFrame() {
         // 获取屏幕大小
@@ -53,20 +59,37 @@ public class MainFrame extends JFrame {
         mi1.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("重新开始");
+                gameFile.saveScore(String.valueOf(0));
+                setVisible(false);
+                new MainFrame().setVisible(true);
+                dispose();
             }
         });
         mi3.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("退出");
+                gameFile.saveScore(String.valueOf(0));
+                System.exit(0);
             }
         });
+        // 设置分数
+        if(gameFile.readScore()>0){
+            setScore(gameFile.readScore()); // （继续游戏时分数可增加）
+        }else{
+            setScore(0);
+        }
 
         initPane(); // 设置面板
         initButton(); // 初始化按钮
         showImage(); // 显示图片
         initTimePane(); // 时间处理
     }
-
+    /**
+     * 设置分数
+     */
+    private void setScore(int score) {
+        this.score = score;
+    }
     /**
      * 面板，显示在窗口上方
      */
@@ -74,7 +97,8 @@ public class MainFrame extends JFrame {
         JPanel scorePane = new JPanel(new FlowLayout()); // 设置成流体布局
         scorePane.add(new JLabel("用户名：hui"));
         scorePane.add(new JLabel("    "));
-        scorePane.add(new JLabel("得分：0"));
+        scorePane.add(new JLabel("得分："));
+        lblScroe.setText("" + score);
 
         JButton btnResort = new JButton("重排");
         JButton btnReplay = new JButton("新游戏");
@@ -106,7 +130,7 @@ public class MainFrame extends JFrame {
                 dispose();  // 释放此窗口的资源
             }
         });
-
+        scorePane.add(lblScroe);
         scorePane.add(btnResort);
         scorePane.add(btnReplay);
         this.getContentPane().add(scorePane, BorderLayout.NORTH); // 添加此在面板上面
@@ -177,6 +201,9 @@ public class MainFrame extends JFrame {
                                 }
                                 // 每消除一对方块数减少2
                                 leftBlock -= 2;
+                                //---加分处理，每消除一对就加10分
+                                score += 10;
+                                lblScroe.setText("" + score);
                                 // 每消除一对方时间增加5s
                                 timeLeft += 5;
                                 if (timeLeft > timeLimit) {
@@ -186,6 +213,8 @@ public class MainFrame extends JFrame {
                                 if (leftBlock == 0) {
                                     System.out.println("winner");
                                     gameTimer.stop();
+                                    // 保存当前的分数到score.txt
+                                    gameFile.saveScore(String.valueOf(score));
                                     // 设置提示框
                                     Component jPanel = null;
                                     Object[] options = { " 继续游戏 ", " 结束游戏" };
@@ -196,8 +225,10 @@ public class MainFrame extends JFrame {
                                     if (response == 0) { // 点击 继续游戏
                                         setVisible(false);
                                         new MainFrame().setVisible(true);
+                                        score = gameFile.readScore(); // 获取当前的分数
                                         dispose();
                                     }else if (response == 1) { // 点击 结束游戏
+                                        gameFile.saveScore(String.valueOf(0)); // 把分数清零
                                         System.exit(0); // 退出游戏
                                     }
                                 }
@@ -269,10 +300,12 @@ public class MainFrame extends JFrame {
                             options[0]);
 
                     if (response == 0) { // 确定
+                        gameFile.saveScore(String.valueOf(0)); // 修改记录分数文件的值为0
                         setVisible(false);
                         new MainFrame().setVisible(true); // 重新打开主界面
                         dispose();
                     }else if (response == 1) { // 取消
+                        gameFile.saveScore(String.valueOf(0)); // 修改记录分数文件的值为0
                         System.exit(0); // 退出游戏
                     }
                 }
