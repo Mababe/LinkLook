@@ -16,8 +16,15 @@ public class MainFrame extends JFrame {
     JButton button2 = null; // 创建第二个点击按钮对象
 
     final GameData gameData = new GameData();
+
     // 生成多个按钮
     JButton[][] buttons = new JButton[GameData.rows][GameData.cols];
+
+    // 时间
+    Timer gameTimer;
+    int leftBlock = GameData.rows * GameData.cols; // 获取总图片数
+    final int timeLimit = 20;
+    int timeLeft = timeLimit;
 
     public MainFrame() {
         // 获取屏幕大小
@@ -57,6 +64,7 @@ public class MainFrame extends JFrame {
         initPane(); // 设置面板
         initButton(); // 初始化按钮
         showImage(); // 显示图片
+        initTimePane(); // 时间处理
     }
 
     /**
@@ -82,6 +90,8 @@ public class MainFrame extends JFrame {
                 System.out.println("重排");
                 gameData.shuffleData(); // 打乱顺序
                 showImage(); // 显示图片
+                timeLeft=timeLeft-10; // 时间减少10s
+//				initTimePane();
             }
         });
         /**
@@ -165,6 +175,32 @@ public class MainFrame extends JFrame {
                                 } catch (InterruptedException e1) {
                                     e1.printStackTrace();
                                 }
+                                // 每消除一对方块数减少2
+                                leftBlock -= 2;
+                                // 每消除一对方时间增加5s
+                                timeLeft += 5;
+                                if (timeLeft > timeLimit) {
+                                    timeLeft = timeLimit;
+                                }
+                                // 当消除完毕，则弹出提示框
+                                if (leftBlock == 0) {
+                                    System.out.println("winner");
+                                    gameTimer.stop();
+                                    // 设置提示框
+                                    Component jPanel = null;
+                                    Object[] options = { " 继续游戏 ", " 结束游戏" };
+                                    int response = JOptionPane.showOptionDialog(null,
+                                            "你还想获得更高分吗？", "继续游戏", JOptionPane.YES_OPTION,
+                                            JOptionPane.QUESTION_MESSAGE, null, options,
+                                            options[0]);
+                                    if (response == 0) { // 点击 继续游戏
+                                        setVisible(false);
+                                        new MainFrame().setVisible(true);
+                                        dispose();
+                                    }else if (response == 1) { // 点击 结束游戏
+                                        System.exit(0); // 退出游戏
+                                    }
+                                }
                             }
                             // 还原两个按钮为空
                             button1.setBackground(Color.WHITE);
@@ -202,5 +238,48 @@ public class MainFrame extends JFrame {
                 }
             }
         }
+    }
+    /**
+     * 时间处理
+     */
+    private void initTimePane() {
+        // 创建进度条面板对象
+        JPanel timePane = new JPanel(new BorderLayout());
+        // 创建进度条对象
+        final JProgressBar timeLine = new JProgressBar();
+        timeLine.setStringPainted(true);
+        timeLine.setMaximum(timeLimit); // 设置进度条最大值
+        timeLine.setValue(timeLimit); // 设置进度条当前值
+        timeLine.setForeground(new Color(112, 34, 141));
+        timePane.add(timeLine); // 添加进度条到timePane面板
+        this.getContentPane().add(timePane, BorderLayout.SOUTH); // 添加timePane面板到容器
+        /**
+         * 每过1s，运行以下函数
+         */
+        gameTimer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                // 时间过了，生成提示框 "时间到了，重新开始游戏吗？"
+                if (timeLeft <= 0) {
+                    ((Timer) arg0.getSource()).stop(); // 时间停止
+                    Object[] options = { " 确定 ", " 取消 " };
+                    int response = JOptionPane.showOptionDialog(null,
+                            "时间到了，重新开始游戏吗？", "游戏结束 ", JOptionPane.YES_OPTION,
+                            JOptionPane.QUESTION_MESSAGE, null, options,
+                            options[0]);
+
+                    if (response == 0) { // 确定
+                        setVisible(false);
+                        new MainFrame().setVisible(true); // 重新打开主界面
+                        dispose();
+                    }else if (response == 1) { // 取消
+                        System.exit(0); // 退出游戏
+                    }
+                }
+                --timeLeft; // 时间自减1
+                timeLine.setValue(timeLeft); // 设置当前时间
+            }
+        });
+        gameTimer.start();
     }
 }
