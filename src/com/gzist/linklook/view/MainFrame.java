@@ -58,6 +58,7 @@ public class MainFrame extends JFrame {
         initButton(); // 初始化按钮
         showImage(); // 显示图片
     }
+
     /**
      * 面板，显示在窗口上方
      */
@@ -100,13 +101,14 @@ public class MainFrame extends JFrame {
         scorePane.add(btnReplay);
         this.getContentPane().add(scorePane, BorderLayout.NORTH); // 添加此在面板上面
     }
+
     /**
      * 初始化面板上面的按钮。
      */
     public void initButton() {
         JPanel gamePanel = new JPanel(new GridLayout(GameData.rows, GameData.cols)); // 设置成网格布局
         for (int i = 0; i < GameData.rows; ++i)
-            for (int j = 0; j < GameData.cols ; ++j) {
+            for (int j = 0; j < GameData.cols; ++j) {
                 buttons[i][j] = new JButton(); // 生成按钮
                 /**
                  * 对每个按钮设置监听事件
@@ -142,14 +144,27 @@ public class MainFrame extends JFrame {
                                 }
                                 System.out.println();
                             }
+                            Graphics g = getGraphics();
+                            Graphics2D g2d = (Graphics2D) g;
+                            // 粗线条
+                            Stroke stroke = new BasicStroke(4.0f);
+                            g2d.setStroke(stroke);
+                            // 红线条
+                            g2d.setColor(Color.red);
                             // 判断能否相连
-                            if (GameRule.isConnect(gameData.data, row1, col1, row2, col2)) {
+                            if (GameRule.isConnect(gameData.data, row1, col1, row2, col2, g2d)) {
                                 // 设置两个按钮不可见
                                 button1.setVisible(false);
                                 button2.setVisible(false);
                                 // 设置两个按钮的 data值为0
                                 gameData.data[row1][col1] = 0;
                                 gameData.data[row2][col2] = 0;
+                                // 延迟生效连接线
+                                try {
+                                    Thread.sleep(200);
+                                } catch (InterruptedException e1) {
+                                    e1.printStackTrace();
+                                }
                             }
                             // 还原两个按钮为空
                             button1.setBackground(Color.WHITE);
@@ -164,16 +179,17 @@ public class MainFrame extends JFrame {
                 this.getContentPane().add(gamePanel, BorderLayout.CENTER);
             }
     }
+
     /**
      * 显示图片
      */
     private void showImage() {
-        for (int i = 0; i < GameData.rows ; ++i) {
-            for (int j = 0; j < GameData.cols ; ++j) {
+        for (int i = 0; i < GameData.rows; ++i) {
+            for (int j = 0; j < GameData.cols; ++j) {
                 buttons[i][j].setVisible(true);
 //				String path = this.getClass().getResource("/image").getPath();
                 // 获取图片路径
-                ImageIcon icon = new ImageIcon("src/images/" + gameData.data[i+1][j+1] + ".png");
+                ImageIcon icon = new ImageIcon("src/images/" + gameData.data[i + 1][j + 1] + ".png");
 //				System.out.println(icon);
                 // 设置图片大小
                 icon.setImage(icon.getImage().getScaledInstance(
@@ -181,7 +197,7 @@ public class MainFrame extends JFrame {
                         Image.SCALE_DEFAULT));
                 buttons[i][j].setIcon(icon);
                 // 如果data为零，按钮不显示
-                if (gameData.data[i+1][j+1] == 0) {
+                if (gameData.data[i + 1][j + 1] == 0) {
                     buttons[i][j].setVisible(false);
                 }
             }
