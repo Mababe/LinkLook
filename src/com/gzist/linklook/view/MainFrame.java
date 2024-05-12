@@ -1,5 +1,8 @@
 package com.gzist.linklook.view;
 
+import com.gzist.linklook.data.GameData;
+import com.gzist.linklook.data.GameRule;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -9,10 +12,12 @@ public class MainFrame extends JFrame {
     final int width = 600; // 设置窗口宽度
     final int height = 600; // 设置窗口高度
 
-    public static int rows = 6; // 连连看的行数
-    public static int cols = 6; // 连连看的列数
+    JButton button1 = null; // 创建第一个点击按钮对象
+    JButton button2 = null; // 创建第二个点击按钮对象
+
+    final GameData gameData = new GameData();
     // 生成多个按钮
-    JButton[][] buttons = new JButton[rows][cols];
+    JButton[][] buttons = new JButton[GameData.rows][GameData.cols];
 
     public MainFrame() {
         // 获取屏幕大小
@@ -76,10 +81,52 @@ public class MainFrame extends JFrame {
      * 初始化面板上面的按钮。
      */
     public void initButton() {
-        JPanel gamePanel = new JPanel(new GridLayout(rows, cols)); // 设置成网格布局
-        for (int i = 0; i < rows; ++i)
-            for (int j = 0; j < cols ; ++j) {
+        JPanel gamePanel = new JPanel(new GridLayout(GameData.rows, GameData.cols)); // 设置成网格布局
+        for (int i = 0; i < GameData.rows; ++i)
+            for (int j = 0; j < GameData.cols ; ++j) {
                 buttons[i][j] = new JButton(); // 生成按钮
+                /**
+                 * 对每个按钮设置监听事件
+                 */
+                buttons[i][j].addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        // 判断哪个按钮被点击
+                        JButton button = (JButton) e.getSource();
+                        // 如果button1 没有记录，即点击第一个按钮
+                        if (button1 == null) {
+                            button1 = button; // 记录第一个按钮
+                            button1.setBackground(Color.BLUE); // 记录第一个按钮的底色为蓝色
+                        } else {
+                            // 否则，如果点击的是第二个按钮，则两个按钮都隐藏
+                            button2 = button; // 记录第二个按钮
+                            button2.setBackground(Color.BLUE); // 记录第二个按钮的底色为蓝色
+                            // 记录第一个按钮的行数
+                            int row1 = (button1.getY() / button1.getHeight()) + 1;
+                            // 记录第一个按钮的列数
+                            int col1 = (button1.getX() / button1.getWidth()) + 1;
+                            // 记录第二个按钮的行数
+                            int row2 = (button2.getY() / button2.getHeight()) + 1;
+                            // 记录第二个按钮的列数
+                            int col2 = (button2.getX() / button2.getWidth()) + 1;
+                            // 输出两个按钮的位置 以及 相应的data值
+                            System.out.println(row1 + " " + col1);
+                            System.out.println(row2 + " " + col2);
+                            // 遍历输出二维数组的值
+                            for (int k = 0; k < GameData.rows + 2; ++k) {
+                                for (int l = 0; l < GameData.cols + 2; ++l) {
+                                    System.out.print(gameData.data[k][l] + " ");
+                                }
+                                System.out.println();
+                            }
+                            // 还原两个按钮为空
+                            button1.setBackground(Color.WHITE);
+                            button2.setBackground(Color.WHITE);
+                            button1 = null;
+                            button2 = null;
+                        }
+                    }
+                });
                 gamePanel.add(buttons[i][j]);
                 // 居中显示
                 this.getContentPane().add(gamePanel, BorderLayout.CENTER);
@@ -89,12 +136,12 @@ public class MainFrame extends JFrame {
      * 显示图片
      */
     private void showImage() {
-        for (int i = 0; i < rows ; ++i) {
-            for (int j = 0; j < cols ; ++j) {
+        for (int i = 0; i < GameData.rows ; ++i) {
+            for (int j = 0; j < GameData.cols ; ++j) {
                 buttons[i][j].setVisible(true);
 //				String path = this.getClass().getResource("/image").getPath();
                 // 获取图片路径
-                ImageIcon icon = new ImageIcon("src/images/1.png");
+                ImageIcon icon = new ImageIcon("src/images/" + gameData.data[i+1][j+1] + ".png");
 //				System.out.println(icon);
                 // 设置图片大小
                 icon.setImage(icon.getImage().getScaledInstance(
